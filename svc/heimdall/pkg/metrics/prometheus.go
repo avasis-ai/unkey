@@ -47,4 +47,29 @@ var (
 			Help:      "Total number of cgroup file read failures.",
 		},
 	)
+
+	// LifecycleEmitted counts CRI lifecycle checkpoints successfully buffered.
+	// kind is "start" or "stop".
+	LifecycleEmitted = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "unkey",
+			Subsystem: "heimdall",
+			Name:      "lifecycle_checkpoints_emitted_total",
+			Help:      "Total number of CRI lifecycle checkpoints written to the buffer.",
+		},
+		[]string{"kind"}, // "start", "stop"
+	)
+
+	// LifecycleDrops counts CRI lifecycle events we could not emit a
+	// checkpoint for. kind is the event type; reason explains the drop so we
+	// can distinguish informer races from cgroup-teardown races.
+	LifecycleDrops = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "unkey",
+			Subsystem: "heimdall",
+			Name:      "lifecycle_checkpoints_dropped_total",
+			Help:      "Total CRI lifecycle events that did not produce a checkpoint. Each drop is a bounded undercharge.",
+		},
+		[]string{"kind", "reason"}, // kind: "start"|"stop"; reason: "pod_not_found"|"cgroup_read_failed"
+	)
 )
